@@ -55,25 +55,29 @@ void Renderer::nanogui_init(GLFWwindow* window)
 	gui_1->addGroup("Bunny Rotation");
 	gui_1->addVariable("a", a_degree)->setSpinnable(true);
 	gui_1->addVariable("b", b_degree)->setSpinnable(true);
-	gui_1->addButton("Rotate", [this]() {
-		//std::cout << a_degree;
+	gui_1->addButton("Rotate local X", [this]() {
 		glm::mat4 bunny_model_mat = m_animation->get_model_mat();
-
-
-		/* Rotation matrix for rotating around y-axis of world space */
-		glm::mat4 y_rotation_mat = glm::rotate(glm::mat4(1.0F), glm::radians(b_degree), glm::vec3(0.0F, 1.0F, 0.0F)) 
-									* bunny_model_mat;
-
 
 		/* Rotation matrix for rotating around x-axis of local space */
 		glm::mat4 x_rotation_mat = glm::rotate(bunny_model_mat, glm::radians(a_degree), glm::vec3(1.0F, 0.0F, 0.0F));
 
-		m_animation->set_model_mat(y_rotation_mat + x_rotation_mat);
+		m_animation->set_model_mat(x_rotation_mat);
 	});
-	gui_1->addButton("Reset", [this]() {
-		/*a_degree = 0.0F;
-		b_degree = 0.0F;*/
+	gui_1->addButton("Rotate world Y", [this]() {
+		glm::mat4 bunny_model_mat = m_animation->get_model_mat();
+
+
+		/* Rotation matrix for rotating around y-axis of world space */
+		glm::mat4 y_rotation_mat = glm::rotate(glm::mat4(1.0F), glm::radians(b_degree), glm::vec3(0.0F, 1.0F, 0.0F))
+			* bunny_model_mat;
+
+		m_animation->set_model_mat(y_rotation_mat);
+		});
+	gui_1->addButton("Reset", [this, gui_1]() {
+		a_degree = 0.0F;
+		b_degree = 0.0F;
 		m_animation->reset();
+		gui_1->refresh();
 	});
 		
 	
