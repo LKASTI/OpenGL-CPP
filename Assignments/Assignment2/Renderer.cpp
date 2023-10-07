@@ -206,12 +206,13 @@ void Renderer::load_models()
 void Renderer::calc_catmull_rom_spline(std::vector<glm::vec3>&curvePoints) {
 	int n = m_curve->control_points_pos.size();
 	for (unsigned int i = 0; i < n; i++) {
-		for (float t = 0.0f; t <= 1.0f; t += 0.005f) {
-			glm::vec3 p0 = m_curve->control_points_pos[i];
-			glm::vec3 p1 = m_curve->control_points_pos[(i + 1) % n];
-			glm::vec3 p2 = m_curve->control_points_pos[(i + 2) % n];
-			glm::vec3 p3 = m_curve->control_points_pos[(i + 3) % n];
 
+		glm::vec3 p0 = m_curve->control_points_pos[i];
+		glm::vec3 p1 = m_curve->control_points_pos[(i + 1) % n];
+		glm::vec3 p2 = m_curve->control_points_pos[(i + 2) % n];
+		glm::vec3 p3 = m_curve->control_points_pos[(i + 3) % n];
+
+		for (float t = 0.0f; t <= 1.0f; t += 0.005f) {
 			float t2 = t * t;
 			float t3 = t2 * t;
 
@@ -223,10 +224,6 @@ void Renderer::calc_catmull_rom_spline(std::vector<glm::vec3>&curvePoints) {
 				);
 
 			curvePoints.push_back(interpolated_point);
-
-			/*glm::mat4 cur_obj_model_mat = glm::mat4(1.0f);
-			cur_obj_model_mat = glm::translate(cur_obj_model_mat, interpolated_point);
-			cur_obj_model_mat = glm::scale(cur_obj_model_mat, glm::vec3(0.2, 0.2, 0.2));*/
 		}
 	}
 }
@@ -263,7 +260,8 @@ void Renderer::draw_scene(Shader& shader)
 				draw_object(shader, obj_list[i]);
 			}
 
-			for (int j = 0; j < curvePoints.size(); j++) {
+			// Test Draw all segments with just cubes 
+			/*for (int j = 0; j < curvePoints.size(); j++) {
 				glm::vec3 p = curvePoints[j];
 
 				glm::mat4 cur_obj_model_mat = glm::mat4(1.0f);
@@ -271,8 +269,8 @@ void Renderer::draw_scene(Shader& shader)
 				cur_obj_model_mat = glm::scale(cur_obj_model_mat, glm::vec3(0.2, 0.2, 0.2));
 				glUniformMatrix4fv(glGetUniformLocation(shader.program, "model"), 1, GL_FALSE, glm::value_ptr(cur_obj_model_mat));
 				draw_object(shader, obj_list[i]);
-			}
-			/* Test drawing all 200 points on one segment */
+			}*/
+			/* Test drawing all 200 points for one segment */
 			/*glm::vec3 p0(0.0, 8.5, -2.0);
 			glm::vec3 p1(3.0, 10.0, 3.7);
 			glm::vec3 p2(7.0, 8.0, -2.0);
@@ -296,7 +294,15 @@ void Renderer::draw_scene(Shader& shader)
 			}*/
 		}
 		if (obj_list[i].obj_name == "curve") 
-		{
+		{	
+			obj_list[i].vao_vertices.clear();
+			for (int j = 0; j < curvePoints.size(); j++) {
+				Object::Vertex objVertex;
+				objVertex.Position = curvePoints[j];
+				obj_list[i].vao_vertices.push_back(objVertex);
+			}
+			bind_vaovbo(obj_list[i]);
+
 			// Draw curve
 			glm::mat4 curve_model_mat =  glm::mat4(1.0f);
 			glUniformMatrix4fv(glGetUniformLocation(shader.program, "model"), 1, GL_FALSE, glm::value_ptr(curve_model_mat));
